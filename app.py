@@ -6,6 +6,9 @@ from streamlit_option_menu import option_menu
 from description_pages.methodology import methodo_page
 from description_pages.indices import indices_descr_page
 from description_pages.pretopo_variants import pretopo_variants_page
+from description_pages.gen_data_descr import gen_data_descr_page
+
+from comparisons.comparison_page import comp_page
 
 st.set_page_config(page_title="Compare Mixed Clustering",layout="wide")
 
@@ -14,8 +17,9 @@ with st.sidebar:
             ["Methodology",
              "Evaluation Indices",
              "Pretopological Clustering",
-             "FAMD Calinski Harabasz",
-             "Laplacian Calinski Harabasz"],
+             "Data Generation",
+             "Comparisons",
+              ],
     menu_icon=None, default_index=1,orientation='vertical')
 
 
@@ -24,4 +28,8 @@ if selected == 'Methodology':
 elif selected == "Evaluation Indices":
     indices_descr_page()
 elif selected == "Pretopological Clustering":
-    pretopo_variants_page   ()
+    pretopo_variants_page()
+elif selected == "Data Generation":
+    gen_data_descr_page()
+elif selected == "Comparisons":
+    comp_page()
