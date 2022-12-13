@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 ### DEBUG
 import streamlit as st
 from scipy.spatial.distance import cdist
+import numpy as np
 
 
 def clust_centers(n_dim, n_centers):
@@ -53,10 +54,17 @@ def generate_data(n_clusters=5,clust_std=0.2,n_num=2,n_cat=2,cat_unique=3,n_indi
         df (pandas.DataFrame): Generated Dataset
     """
     # Compute Centers
-    c_centers = clust_centers((n_num+n_cat), n_clusters)
-    print(c_centers)
+    #c_centers = clust_centers((n_num+n_cat), n_clusters)
+    #print(c_centers)
 
     # Generate Numerical Data with computed centers
+
+    c_centers = make_blobs(n_samples=n_clusters, n_features=n_cat+n_num, cluster_std=0, centers=n_clusters,
+            return_centers=True)[2]
+
+    print(
+        StandardScaler().fit_transform(c_centers)
+    )
 
     blobs = make_blobs(n_samples=n_indiv,
                       n_features=n_num+n_cat,
@@ -67,16 +75,16 @@ def generate_data(n_clusters=5,clust_std=0.2,n_num=2,n_cat=2,cat_unique=3,n_indi
 
     #print(blobs[1])
     #print("now centers:")
-    print(cdist(blobs[2],blobs[2]))
-    print(blobs[2])
+    print(np.mean(cdist(blobs[2],blobs[2])))
+    #print(blobs[2])
 
-    #for col in df.columns:
-    #    df[col] = StandardScaler().fit_transform(df[[col]])
+    for col in df.columns:
+        df[col] = StandardScaler().fit_transform(df[[col]])
 
     #print(df.describe())
 
     # Discretize categorical features
     for i in range(n_cat):
-        df.iloc[:,-i] = pd.qcut(df.iloc[:,i],cat_unique,labels=False, duplicates='drop').astype(str)
+        df.iloc[:,-i-1] = pd.qcut(df.iloc[:,i],cat_unique,labels=False, duplicates='drop').astype(str)
 
     return df

@@ -26,3 +26,5 @@ def comp_page():
         'cat_unique':[2,3,4,5,6,7,8],
         'n_indiv':[30,100,250,500,1000,2500]
     }
+
+    st.write("TODO")
