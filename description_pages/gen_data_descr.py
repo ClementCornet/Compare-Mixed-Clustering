@@ -19,7 +19,6 @@ def gen_data_descr_page():
         cat_unique=3,
         n_indiv=100
     )
-
     ```
     An other interresting parameter used to generate data is the Cluster Standard Deviation, i.e. the
     dispersion of different variables around cluster centers.  
