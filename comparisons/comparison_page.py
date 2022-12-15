@@ -14,7 +14,7 @@ import plotly.graph_objects as go
 
 def comp_page():
     """
-    The page data that generates data, and evaluates performances of different algorithms on each
+    The page that generates data, and evaluates performances of different algorithms on each
     clustering result.
     """
 
@@ -28,15 +28,9 @@ def comp_page():
         stx.TabBarItemData(id='cat_unique',title='Categorical Unique Values',description=''),
         stx.TabBarItemData(id='n_indiv',title='Number of individuals',description=''),
     ])
-
-    #grid = {
-    #    'n_clusters':[2,3,4,5,6,7,8,9,10],
-    #    'clust_std':[0.05,0.1,0.15,0.20,0.25,0.3,0.35,0.4],
-    #    'n_num':[2,3,4,5,6,7,8,9,10],
-    #    'n_cat':[2,3,4,5,6,7,8,9,10],
-    #    'cat_unique':[2,3,4,5,6,7,8],
-    #    'n_indiv':[30,100,250,500,1000,2500]
-    #}
+    if param not in ['n_clusters','clust_std','n_num','n_cat','cat_unique','n_indiv']:
+        st.info("Select a Paramater to compare the algorithms on")
+        return
 
     comp = Comparator(
         KPrototypes=algos.kproto.process,
@@ -47,7 +41,7 @@ def comp_page():
 
 class Comparator:
     """
-    Class Designed to compare different mixed-clustering algorithms on different datasets.
+    Class Designed to compare different mixed-clustering algorithms on different generated datasets.
 
     """
 

@@ -43,7 +43,7 @@ def pretopo_variants_page():
     famd = famd.fit(df) # Last column is clusters, so it must not affect FAMD coordinates (just color)
     reduced = famd.row_coordinates(df) # Get coordinates of each row
     reduced.columns = ['X','Y','Z']
-    reduced['cluster'] = process(df)['cluster']
+    reduced['cluster'] = process(df)#['cluster']
 
     st.write("Sample Graph : ")
     fig = px.scatter_3d(reduced, 'X', 'Y', 'Z', color='cluster')

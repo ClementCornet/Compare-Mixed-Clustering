@@ -13,11 +13,11 @@ def gen_data_descr_page():
     ```python
     def generate_data(
         n_clusters=5,
-        clust_std=0.2,
-        n_num=2,
-        n_cat=2,
+        clust_std=2,
+        n_num=15,
+        n_cat=15,
         cat_unique=3,
-        n_indiv=100
+        n_indiv=250
     )
     ```
     An other interresting parameter used to generate data is the Cluster Standard Deviation, i.e. the
