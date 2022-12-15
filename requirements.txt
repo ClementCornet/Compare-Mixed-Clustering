@@ -7,3 +7,4 @@ scipy
 pandas
 prince
 kmodes
+extra_streamlit_components

@@ -38,7 +38,7 @@ def clust_centers(n_dim, n_centers):
     return grid
 
 
-def generate_data(n_clusters=5,clust_std=0.2,n_num=2,n_cat=2,cat_unique=3,n_indiv=100):
+def generate_data(n_clusters=5,clust_std=2,n_num=15,n_cat=15,cat_unique=3,n_indiv=250):
     """
     Generates a Dataset to benchmark clustering algorithms
 
@@ -59,12 +59,13 @@ def generate_data(n_clusters=5,clust_std=0.2,n_num=2,n_cat=2,cat_unique=3,n_indi
 
     # Generate Numerical Data with computed centers
 
-    c_centers = make_blobs(n_samples=n_clusters, n_features=n_cat+n_num, cluster_std=0, centers=n_clusters,
-            return_centers=True)[2]
 
-    print(
-        StandardScaler().fit_transform(c_centers)
-    )
+    #c_centers = make_blobs(n_samples=n_clusters, n_features=n_cat+n_num, cluster_std=0, centers=n_clusters,
+    #        return_centers=True)[2]
+
+    #print(
+    #    StandardScaler().fit_transform(c_centers)
+    #)
 
     blobs = make_blobs(n_samples=n_indiv,
                       n_features=n_num+n_cat,
@@ -75,7 +76,7 @@ def generate_data(n_clusters=5,clust_std=0.2,n_num=2,n_cat=2,cat_unique=3,n_indi
 
     #print(blobs[1])
     #print("now centers:")
-    print(np.mean(cdist(blobs[2],blobs[2])))
+    #print(np.mean(cdist(blobs[2],blobs[2])))
     #print(blobs[2])
 
     for col in df.columns:

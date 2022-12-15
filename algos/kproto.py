@@ -33,6 +33,5 @@ def process(df, **kwargs):
 
     kproto.fit_predict(df_scale, categorical=categorical_indexes)
 
-    # add clusters to dataframe
-    df["cluster"] = kproto.labels_
-    return df
+    # return clusters as a list
+    return  kproto.labels_
