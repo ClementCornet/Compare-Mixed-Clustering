@@ -4,6 +4,7 @@ from pretopo.FAMD_Pretopo import process
 import prince
 import plotly.express as px
 
+
 def pretopo_variants_page():
 
     st.title("Pretopological Clustering")
@@ -48,3 +49,5 @@ def pretopo_variants_page():
     fig = px.scatter_3d(reduced, 'X', 'Y', 'Z', color='cluster')
     fig.update_layout(margin=dict(r=0,t=0,b=0,l=0))
     st.plotly_chart(fig)
+
+    

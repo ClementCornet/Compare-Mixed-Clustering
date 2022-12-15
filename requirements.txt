@@ -2,3 +2,8 @@ streamlit
 streamlit_option_menu
 plotly
 sklearn
+numpy
+scipy
+pandas
+prince
+kmodes
