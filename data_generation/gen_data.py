@@ -38,9 +38,11 @@ def clust_centers(n_dim, n_centers):
     return grid
 
 
-def generate_data(n_clusters=5,clust_std=2,n_num=15,n_cat=15,cat_unique=3,n_indiv=250):
+def generate_data(n_clusters=5,clust_std=0.08,n_num=15,n_cat=15,cat_unique=3,n_indiv=250):
     """
-    Generates a Dataset to benchmark clustering algorithms
+    Generates a Dataset to benchmark clustering algorithms. First generates centers for the given number of
+    data points and features, then scales them to the average distance between centroïds is 1. Then generates
+    isotropic Gaussian blobs around those centers, and discretizes some variables to get categorical features.
 
     Parameters:
         n_clusters (int): Number of clusters to generate
@@ -53,39 +55,58 @@ def generate_data(n_clusters=5,clust_std=2,n_num=15,n_cat=15,cat_unique=3,n_indi
     Returns:
         df (pandas.DataFrame): Generated Dataset
     """
-    # Compute Centers
-    #c_centers = clust_centers((n_num+n_cat), n_clusters)
-    #print(c_centers)
 
-    # Generate Numerical Data with computed centers
+    #blobs = make_blobs(n_samples=n_indiv,
+    #                  n_features=n_num+n_cat,
+    #                  cluster_std=clust_std,
+    #                  centers=n_clusters,
+    #                  return_centers=True)
+
+    mono_blobs = make_blobs(
+        n_samples=n_clusters,
+        n_features=n_num+n_cat,
+        centers=n_clusters,
+        return_centers=True
+    )
+
+    #df = pd.DataFrame(blobs[0])
+
+    #avg_dist = np.mean(cdist(mono_blobs[2],mono_blobs[2]))
+    #st.write(avg_dist)
+    #st.write(cdist(mono_blobs[2],mono_blobs[2]))
+
+    distances = [cdist(mono_blobs[2],mono_blobs[2])[i][j] for i in range(n_clusters) for j in range(n_clusters) if i>j]
+    #st.write(distances)
+    avg_dist = np.mean(distances)
+    #st.write(avg_dist)
 
 
-    #c_centers = make_blobs(n_samples=n_clusters, n_features=n_cat+n_num, cluster_std=0, centers=n_clusters,
-    #        return_centers=True)[2]
+    #st.write(mono_blobs[2])
+    #st.write(cdist(mono_blobs[2]/avg_dist,mono_blobs[2]/avg_dist))
 
-    #print(
-    #    StandardScaler().fit_transform(c_centers)
-    #)
 
-    blobs = make_blobs(n_samples=n_indiv,
-                      n_features=n_num+n_cat,
-                      cluster_std=clust_std,
-                      centers=n_clusters,
-                      return_centers=True)
-    df = pd.DataFrame(blobs[0])
+    generated_blobs = make_blobs(
+        n_samples=n_indiv,
+        n_features=n_num+n_cat,
+        centers=mono_blobs[2]/avg_dist,
+        cluster_std=clust_std,
+        return_centers=True
+    )
 
-    #print(blobs[1])
-    #print("now centers:")
-    #print(np.mean(cdist(blobs[2],blobs[2])))
-    #print(blobs[2])
+    #print(cdist(generated_blobs[2],generated_blobs[2]))
 
-    for col in df.columns:
-        df[col] = StandardScaler().fit_transform(df[[col]])
+    df = pd.DataFrame(generated_blobs[0])
+
+
+    #for col in df.columns:
+    #    df[col] = StandardScaler().fit_transform(df[[col]])
 
     #print(df.describe())
 
     # Discretize categorical features
     for i in range(n_cat):
-        df.iloc[:,-i-1] = pd.qcut(df.iloc[:,i],cat_unique,labels=False, duplicates='drop').astype(str)
+        df.iloc[:,-i-1] = pd.qcut(df.iloc[:,-i-1],cat_unique,labels=False, 
+        #duplicates='drop'
+        ).astype(str)
 
     return df

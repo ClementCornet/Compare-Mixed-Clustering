@@ -37,7 +37,7 @@ def pretopo_variants_page():
         n_cat=15,
         cat_unique=3,
         n_indiv=1000,
-        clust_std=2
+        clust_std=0.08
     )
     famd = prince.FAMD(3) # 3 components = 3D, to plot
     famd = famd.fit(df) # Last column is clusters, so it must not affect FAMD coordinates (just color)
