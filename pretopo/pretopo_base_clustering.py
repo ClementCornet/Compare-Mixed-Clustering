@@ -5,15 +5,29 @@ import numpy as np
 
 class Pretopocluster:
 
+    
+
     def __init__(self):
         self.labels_ = np.array([])
 
     def fit(self, data):
-        self.labels_ = clustering(data)
+        with recursion_depth(500000):
+            self.labels_ = clustering(data)
 
     def fit_predict(self, data, distance_func=None, area_val=None):
-        self.labels_ = clustering(data,distance_func,area_val)
+        with recursion_depth(500000):
+            self.labels_ = clustering(data,distance_func,area_val)
         return self.labels_
+
+import sys
+class recursion_depth:
+    def __init__(self, limit):
+        self.limit = limit
+        self.default_limit = sys.getrecursionlimit()
+    def __enter__(self):
+        sys.setrecursionlimit(self.limit)
+    def __exit__(self, type, value, traceback):
+        sys.setrecursionlimit(self.default_limit)
 
 def clustering(data, method="mine",distance_func=None,area_val=None):
 
