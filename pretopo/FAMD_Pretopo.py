@@ -10,4 +10,9 @@ def process(df, **kwargs):
 
     # return clusters as a list
     clusters = pretopo_clusters.astype(str)
+
+    import streamlit as st
+    st.write("famd")
+    import pandas as pd
+    st.write(pd.Series(clusters).value_counts())
     return clusters

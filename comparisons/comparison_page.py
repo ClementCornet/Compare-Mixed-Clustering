@@ -1,6 +1,7 @@
 import streamlit as st
 import extra_streamlit_components as stx
 import pandas as pd
+import numpy as np
 
 from data_generation.gen_data import generate_data
 
@@ -10,11 +11,14 @@ import algos.kamila
 import pretopo.FAMD_Pretopo
 import pretopo.UMAP_pretopo
 import pretopo.PaCMAP_preotopo
+import pretopo.Laplacian_pretopo
 
 import prince
 import umap.umap_ as umap
-
-from sklearn.metrics import calinski_harabasz_score, davies_bouldin_score
+import gower
+from sklearn.metrics import calinski_harabasz_score, davies_bouldin_score, silhouette_score
+from scipy.spatial.distance import cdist
+from sklearn.manifold import MDS
 
 import plotly.express as px
 import plotly.graph_objects as go
@@ -47,15 +51,32 @@ def comp_page_range():
     )
     comp.compare_on_range(param)
 
+
+def compare_upload():
+    comp = Comparator(
+            KPrototypes=algos.kproto.process,
+            Kamila=algos.kamila.process,
+            FAMD_KMeans=algos.famd_kmeans.process,
+            FAMD_Pretopo=pretopo.FAMD_Pretopo.process,
+            Laplacian_Pretopo=pretopo.Laplacian_pretopo.process,
+            UMAP_Pretopo=pretopo.UMAP_pretopo.process,
+            UMAP_Pretopo2=pretopo.UMAP_pretopo.process2,
+            UMAP_Pretopo3=pretopo.UMAP_pretopo.process3cityblock,
+            UMAP_huang = pretopo.UMAP_pretopo.process_huang,
+            PaCMAP_Pretopo=pretopo.PaCMAP_preotopo.process,
+            PaCMAP_Pretopo2=pretopo.PaCMAP_preotopo.process2
+        )
+    comp.uploaded_data_comparison()
+
 def compare_punctual():
     cols = st.columns([1,3])
     #return
     with cols[0].container():
         n_indiv = st.select_slider('Number of individuals',[50,250,500,1000,1750,2500],250)
         n_clust = st.select_slider('Number of Clusters',[2,3,5,7,10,15,20],3)
-        n_num = st.select_slider('Number of Numerical Features',[1,3,5,10,15,25],10)
-        n_cat = st.select_slider('Number of Categorical Features',[1,3,5,10,15,25],10)
-        cat_unique = st.select_slider('Unique values for Categorical Features',[2,3,5,7,10],3)
+        n_num = st.select_slider('Number of Numerical Features',[1,3,5,10,15,25,50,100,200],10)
+        n_cat = st.select_slider('Number of Categorical Features',[1,3,5,10,15,25,50,100,200],10)
+        cat_unique = st.select_slider('Unique values for Categorical Features',[2,3,5,7,10,50,100],3)
         clust_std = st.select_slider('Clusters Dispersion',[0.001,0.01,0.05,0.1,0.15,0.2,0.25,0.3],0.1)
         df = generate_data(n_indiv=n_indiv,n_clusters=n_clust,n_num=n_num,n_cat=n_cat,
                 cat_unique=cat_unique,clust_std=clust_std)
@@ -65,8 +86,13 @@ def compare_punctual():
             Kamila=algos.kamila.process,
             FAMD_KMeans=algos.famd_kmeans.process,
             FAMD_Pretopo=pretopo.FAMD_Pretopo.process,
+            Laplacian_Pretopo=pretopo.Laplacian_pretopo.process,
             UMAP_Pretopo=pretopo.UMAP_pretopo.process,
-            PaCMAP_Pretopo=pretopo.PaCMAP_preotopo.process
+            UMAP_Pretopo2=pretopo.UMAP_pretopo.process2,
+            UMAP_Pretopo3=pretopo.UMAP_pretopo.process3cityblock,
+            UMAP_huang = pretopo.UMAP_pretopo.process_huang,
+            PaCMAP_Pretopo=pretopo.PaCMAP_preotopo.process,
+            PaCMAP_Pretopo2=pretopo.PaCMAP_preotopo.process2
         )
         comp.punctual_comparison(df)
 
@@ -205,6 +231,7 @@ class Comparator:
         reduced = famd.row_coordinates(df) # Get coordinates of each row
         indices['FAMD-CH'] = calinski_harabasz_score(reduced, clusters) # Calinski-Harabasz on FAMD coordinates
         indices['FAMD-DB'] = davies_bouldin_score(reduced, clusters)
+        indices['FAMD-Si'] = silhouette_score(reduced, clusters)
 
         # PROCESS UMAP
         n_components=3
@@ -226,6 +253,26 @@ class Comparator:
         um = pd.DataFrame(embedding.embedding_) # Each points' UMAP coordinate
         indices['UMAP-CH'] = calinski_harabasz_score(um, clusters) # Calinski-Harabasz on FAMD coordinates
         indices['UMAP-DB'] = davies_bouldin_score(um, clusters)
+        indices['UMAP-Si'] = silhouette_score(um, clusters)
+
+
+        g_mat = gower.gower_matrix(df)
+        indices['Gower-Si'] = silhouette_score(
+                 g_mat, 
+                 clusters,
+                 metric="precomputed")
+
+        categorical = df.select_dtypes(include='object')
+        categorical = pd.get_dummies(categorical)
+        gamma = np.mean(np.std(numerical))/2
+        # Compute pairwise distance matrix
+        huang = (cdist(numerical,numerical,'sqeuclidean')) + cdist(categorical,categorical,'hamming')*gamma*2
+        model = MDS(n_components=len(df.columns), dissimilarity='precomputed')
+        emb = model.fit(huang).embedding_
+        indices['MDS-CH'] = calinski_harabasz_score(emb, clusters) # Calinski-Harabasz on FAMD coordinates
+        indices['MDS-DB'] = davies_bouldin_score(emb, clusters)
+        indices['MDS-Si'] = silhouette_score(emb, clusters)
+
 
         return indices
     
@@ -233,6 +280,35 @@ class Comparator:
         self.results = {
             name:self.algos[name](df) for name in self.algos.keys() 
         }
+        #for k,v in self.results.items():
+        #    st.write(k)
+        #    st.write(Comparator.internal_indices(df, v))
+
+        indices = {k:Comparator.internal_indices(df, v) for k,v in self.results.items()}
+        #st.write(indices)
+
+        for index in indices[list(indices.keys())[0]]:
+            #st.write(index)
+            #st.write({k:v[index] for k,v in indices.items()})
+            index_dict = {k:v[index] for k,v in indices.items()}
+
+            fig = px.histogram(x=index_dict.keys(), y=index_dict.values(),title=index)
+            fig.update_xaxes(title="Algorithm")
+            fig.update_yaxes(title=index)
+            st.plotly_chart(fig)
+
+    def uploaded_data_comparison(self):
+
+        up = st.file_uploader('Upload File')    
+        st.session_state['truth'] = False
+        if up:
+            df = pd.read_csv(up).dropna()
+        else:
+            return
+        self.results = {
+            name:self.algos[name](df) for name in self.algos.keys() 
+        }
+        st.dataframe(df)
         #for k,v in self.results.items():
         #    st.write(k)
         #    st.write(Comparator.internal_indices(df, v))

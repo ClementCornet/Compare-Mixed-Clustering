@@ -1,3 +1,4 @@
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from pretopo.pretopo_utils import prenetwork_closest, elementary_closures_shortest_degree, elementary_closures_shortest_degree_largeron
 from pretopo.pretopo_hierarchy import pseudohierarchy_filter_equivalents, pseudohierarchy_filter_threshold, pseudohierarchy_gravity
 
@@ -15,8 +16,14 @@ class Pretopocluster:
             self.labels_ = clustering(data)
 
     def fit_predict(self, data, distance_func=None, area_val=None):
+        #import pandas as pd
+        #data = pd.DataFrame(data)
+        #for c in data.columns:
+        #    if data[c].dtype != 'object':
+        #        print(c)
+        #        data[[c]] = StandardScaler().fit_transform(data[[c]])
         with recursion_depth(500000):
-            self.labels_ = clustering(data,distance_func,area_val)
+            self.labels_ = clustering(np.asarray(data),distance_func,area_val)
         return self.labels_
 
 import sys
@@ -36,10 +43,10 @@ def clustering(data, method="mine",distance_func=None,area_val=None):
 
     if method == "mine":
         print("mine")
-        closures_list = elementary_closures_shortest_degree(pre_space, 2)
+        closures_list = elementary_closures_shortest_degree(pre_space, 20)
     else:
         print("largeron")
-        closures_list = elementary_closures_shortest_degree_largeron(pre_space, 2)
+        closures_list = elementary_closures_shortest_degree_largeron(pre_space, 20)
     # print_closures_members(closures_list)
     # compare_closures(closures_list, closures_list_largeron)
 

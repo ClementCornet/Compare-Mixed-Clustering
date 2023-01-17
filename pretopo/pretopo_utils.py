@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from scipy.spatial import distance_matrix
+from sklearn.preprocessing import StandardScaler
 
 
 
@@ -13,6 +14,7 @@ def prenetwork_closest(points, distances=True, distance_func=None, area_val=None
     x_dif = np.amax(points[:, 0]) - np.amin(points[:, 0])
     y_dif = np.amax(points[:, 1]) - np.amin(points[:, 1])
     area = x_dif*y_dif
+
     square_length = math.sqrt(area / len(points)) # sqrt of area for each point
 
 
